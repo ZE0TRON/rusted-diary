@@ -1,4 +1,4 @@
-use std::{io, num::ParseIntError};
+use std::io;
 
 #[derive(Debug)]
 struct Tamagotchi {
@@ -71,40 +71,34 @@ impl Tamagotchi{
 
 }
 
-fn parse_command(command : Option<&str>, command_param: Option<&str>, simp : &mut Tamagotchi) -> bool {
-    match command {
-        Some(command) => {
-            match command {
-                "feed" => simp.feed(),
-                "talk" => simp.talk(),
-                "sleep" => {
-                    match command_param{
-                        Some(time) => {
-                            let time = u8::from_str_radix(time, 10);
-                            match time.ok() {
-                                Some(time) => simp.sleep(time),
-                                None => {
-                                    println!("wrong time parameter for sleep command");
-                                    return false;
-                                }
-                            }
-                        },
-                        None => {
-                            println!("wrong time parameter for sleep command");
-                            return  false;
-                        }
-                    }
-                },
-                other => {
-                    println!("No command found {other}");
-                    return false;
-                }
-            }
-        },
-        None => {
-            println!("No command given please try again");
-            return false; 
+fn parse_sleep_command(command_param: Option<&str>, simp : &mut Tamagotchi) -> bool {
+    if let Some(time) = command_param {
+        let time = u8::from_str_radix(time, 10);
+        if let Some(time) =  time.ok() {
+            simp.sleep(time);
+            true
+        } else { 
+            false
         }
+    } else {
+        true
+    }
+}
+
+fn parse_command(command : Option<&str>, command_param: Option<&str>, simp : &mut Tamagotchi) -> bool {
+    if let Some(command)  = command {
+        match command {
+            "feed" => simp.feed(),
+            "talk" => simp.talk(),
+            "sleep" => {
+                return parse_sleep_command(command_param ,simp);
+            },
+            _ => {
+                return false;
+            }
+        }
+    } else {
+        return false; 
     }
     true
 }
